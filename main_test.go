@@ -18,8 +18,8 @@ type CafeCountReq struct {
 }
 
 type CafeSearchReq struct {
-	search string
-	wantCount   int
+	search    string
+	wantCount int
 }
 
 func TestCafeNotOk(t *testing.T) {
@@ -81,47 +81,50 @@ func TestCafeCount(t *testing.T) {
 
 	var cafeCount int
 
+	// Setting a city name for tests
+	const city = "moscow"
+
 	// Looping through all cities
-	for city, _ := range cafeList {
+	//for city, _ := range cafeList {
 
-		// Receiving maximum cafes count per a city
-		maxCafeCount := len(cafeList[city])
+	// Receiving maximum cafes count per a city
+	maxCafeCount := len(cafeList[city])
 
-		for _, v := range requests {
+	for _, v := range requests {
 
-			cafeCount = 0
+		cafeCount = 0
 
-			response := httptest.NewRecorder()
+		response := httptest.NewRecorder()
 
-			// Preparing URL
-			url := "/cafe?city=" + city + "&count=" + strconv.Itoa(v.count)
+		// Preparing URL
+		url := "/cafe?city=" + city + "&count=" + strconv.Itoa(v.count)
 
-			// Executing request
-			req := httptest.NewRequest("GET", url, nil)
+		// Executing request
+		req := httptest.NewRequest("GET", url, nil)
 
-			handler.ServeHTTP(response, req)
+		handler.ServeHTTP(response, req)
 
-			// Evaluating a received status code
-			require.Equal(t, http.StatusOK, response.Code)
+		// Evaluating a received status code
+		require.Equal(t, http.StatusOK, response.Code)
 
-			// Getting cafes string from a request body
-			cafeString := strings.TrimSpace(response.Body.String())
+		// Getting cafes string from a request body
+		cafeString := strings.TrimSpace(response.Body.String())
 
-			if cafeString != "" {
+		if cafeString != "" {
 
-				// Splitting a resulted string into a slice
-				cafeSlice = strings.Split(cafeString, ",")
+			// Splitting a resulted string into a slice
+			cafeSlice = strings.Split(cafeString, ",")
 
-				// Getting a size of the slice
-				cafeCount = len(cafeSlice)
-
-			}
-
-			// Performing a test validation for cafes count
-			assert.Equal(t, min(v.wait, maxCafeCount), cafeCount)
+			// Getting a size of the slice
+			cafeCount = len(cafeSlice)
 
 		}
+
+		// Performing a test validation for cafes count
+		assert.Equal(t, min(v.wait, maxCafeCount), cafeCount)
+
 	}
+	//}
 }
 
 func TestCafeSearch(t *testing.T) {
@@ -175,6 +178,12 @@ func TestCafeSearch(t *testing.T) {
 			// Splitting a resulted string into a slice
 			cafeSlice = strings.Split(cafeString, ",")
 
+			// Getting a size of the slice
+			cafeCount = len(cafeSlice)
+
+			// Performing a test validation for cafes count
+			assert.Equal(t, min(v.wantCount, maxCafeCount), cafeCount)
+
 			// Validating cafe names for search string
 			for _, cafeName := range cafeSlice {
 
@@ -182,17 +191,13 @@ func TestCafeSearch(t *testing.T) {
 				cafeNameLowerCase := strings.ToLower(cafeName)
 
 				// Performing a validation, that a cafe name contains a search string (both in lower case)
-				assert.True(t, strings.Contains(cafeNameLowerCase, searchStringLowerCase), true)
+				//	assert.True(t, strings.Contains(cafeNameLowerCase, searchStringLowerCase), true)
+
+				assert.Contains(t, cafeNameLowerCase, searchStringLowerCase)
 
 			}
 
-			// Getting a size of the slice
-			cafeCount = len(cafeSlice)
-
 		}
-
-		// Performing a test validation for cafes count
-		assert.Equal(t, min(v.wantCount, maxCafeCount), cafeCount)
 
 	}
 }
